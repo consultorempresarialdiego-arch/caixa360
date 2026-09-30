@@ -1,6 +1,11 @@
 import type { StatusAssinatura } from "@/lib/assinatura";
 
 const APRESENTACAO: Record<StatusAssinatura, { titulo: string; texto: string }> = {
+  pendente: {
+    titulo: "Aguardando confirmação de pagamento",
+    texto:
+      "Ainda não identificamos a confirmação do seu pagamento. Seu acesso continua liberado enquanto isso é confirmado — se você já pagou, entre em contato para agilizarmos.",
+  },
   acesso_antecipado: {
     titulo: "Você está no acesso antecipado",
     texto:

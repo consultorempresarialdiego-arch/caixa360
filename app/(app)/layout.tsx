@@ -2,7 +2,8 @@ import { redirect } from "next/navigation";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { MobileNav } from "@/components/layout/MobileNav";
 import { createClient } from "@/lib/supabase/server";
-import { usuarioTemEmpresaVinculada } from "@/lib/empresa";
+import { obterEmpresaAtual } from "@/lib/empresa";
+import { obterAssinaturaAtual, acessoLiberado } from "@/lib/assinatura";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
@@ -22,9 +23,16 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   // Nenhuma tela da área autenticada (Dashboard, Contas a Pagar/Receber,
   // Fluxo de Caixa, Importação, Configurações) é acessível sem empresa
   // configurada.
-  const temEmpresa = await usuarioTemEmpresaVinculada();
-  if (!temEmpresa) {
+  const empresa = await obterEmpresaAtual();
+  if (!empresa) {
     redirect("/onboarding");
+  }
+
+  // Nem sem pagamento confirmado (status "pendente" além da carência) ou com
+  // acesso pausado/cancelado — ver lib/assinatura.ts (acessoLiberado).
+  const assinatura = await obterAssinaturaAtual(empresa.id);
+  if (!acessoLiberado(assinatura)) {
+    redirect("/acesso-bloqueado");
   }
 
   return (
